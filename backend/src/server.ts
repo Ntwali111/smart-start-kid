@@ -2,6 +2,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import type { CookieOptions } from "express";
 import type { Prisma } from "@prisma/client";
 import { ReminderStatus, UserRole } from "@prisma/client";
 import {
@@ -16,6 +17,8 @@ import { prisma } from "./lib/prisma";
 dotenv.config();
 
 const app = express();
+// Behind Railway / Render / other proxies (needed for secure cookies)
+app.set("trust proxy", 1);
 const port = Number(process.env.PORT ?? 4000);
 const frontendOrigin = process.env.FRONTEND_URL ?? "http://localhost:3000";
 const allowedOrigins = new Set([frontendOrigin, "http://localhost:3000", "http://localhost:3001"]);
@@ -134,12 +137,7 @@ app.post("/api/auth/signup", async (req, res) => {
       email: user.email,
     });
 
-    res.cookie(AUTH_COOKIE_NAME, token, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 7 * 1000,
-    });
+    res.cookie(AUTH_COOKIE_NAME, token, cookieOptions());
 
     res.json({
       user: { id: user.id, fullName: user.fullName, email: user.email, role: user.role },
@@ -166,12 +164,7 @@ app.post("/api/auth/login", async (req, res) => {
       email: user.email,
     });
 
-    res.cookie(AUTH_COOKIE_NAME, token, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 7 * 1000,
-    });
+    res.cookie(AUTH_COOKIE_NAME, token, cookieOptions());
     res.json({
       user: { id: user.id, fullName: user.fullName, email: user.email, role: user.role },
     });
@@ -180,8 +173,20 @@ app.post("/api/auth/login", async (req, res) => {
   }
 });
 
+function cookieOptions(overrides: Partial<CookieOptions> = {}): CookieOptions {
+  const prod = process.env.NODE_ENV === "production";
+  // Frontend (e.g. Vercel) and API (e.g. Railway) are different sites — need SameSite=None for fetch+credentials.
+  return {
+    httpOnly: true,
+    sameSite: prod ? ("none" as const) : ("lax" as const),
+    secure: prod,
+    maxAge: 60 * 60 * 24 * 7 * 1000,
+    ...overrides,
+  };
+}
+
 app.post("/api/auth/logout", (_req, res) => {
-  res.cookie(AUTH_COOKIE_NAME, "", { httpOnly: true, maxAge: 0 });
+  res.cookie(AUTH_COOKIE_NAME, "", cookieOptions({ maxAge: 0 }));
   res.json({ ok: true });
 });
 

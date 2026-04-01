@@ -1,121 +1,139 @@
-Smart Start Kids
+# Smart Start Kids
 
-This is web app that teaches children about money. Learners read short lessons, answer quizzes, and can set savings goals. Parents and facilitators get their own screens so they can see how a child is doing not just scores, but progress over time.
+This is my exam project: a **web app that teaches children about money** in a simple, friendly way. Learners read short lessons, answer quizzes, and set savings goals. **Parents** and **facilitators** can sign in and follow how learners are doing.
 
-I built the full stack : a small REST API in Node , Next.js website for the UI, and the database behind it so users and progress are saved properly.
+I built the full stack myself: a **REST API** in Node (Express), a **Next.js** frontend, and a **PostgreSQL** database with Prisma.
 
- What the app does 
+---
 
-Who and What they can do 
+## What the app does (in plain words)
 
-Child : Sign up / log in, follow lessons in order, take quizzes, set savings goals, see their own progress. 
-Parent :Link to a child’s account, search children by email, see dashboards and progress for linked kids. 
-Facilitator :Similar to parents: link children, view class lists and individual progress. 
+| Who | What they can do |
+|-----|-------------------|
+| **Child** | Sign up / log in, follow lessons in order, take quizzes, set savings goals, see progress. |
+| **Parent** | Link to a child, search children by email, view dashboards and progress. |
+| **Facilitator** | Link children, view class-style lists and individual progress. |
 
-Lessons are ordered so learning feels like a path for example it starts with What is money? and continues through saving, needs vs wants, earning, and a simple budget idea. Each lesson can have quiz questions; submitting answers saves a score and marks progress.
+Lessons start with *“What is money?”* and continue through saving, needs vs wants, earning, and a simple budget idea.
 
-What I used (tech)
-Frontend: Next.js, React, TypeScript, Tailwind CSS  
-Backend: Express (Node), TypeScript  
-Database: SQLite locally, with Prisma as the ORM (models for users, lessons, quizzes, goals, links between parents and children, etc.)  
-Security:Passwords are hashed; login uses a JWT stored in an httpOnly cookie so the browser sends it safely with API calls  
+---
 
-The frontend talks to the backend using `NEXT_PUBLIC_API_URL` (for local dev, `http://localhost:4000`). CORS is set so the React app and API can work together when both run on your machine.
+## What I used
 
-What I actually built (project work)
+- **Frontend:** Next.js, React, TypeScript, Tailwind  
+- **Backend:** Express, TypeScript  
+- **Database:** PostgreSQL + Prisma (migrations in `backend/prisma/migrations`)  
+- **Auth:** JWT in an **httpOnly** cookie; in production the cookie uses **SameSite=None** + **Secure** so the browser can send it when the site and API are on different domains (e.g. Vercel + Railway).
 
-1. Backend 
-   Routes for sign up, login, logout, who am I, lessons (list + detail), quizzes (list + submit), savings goals, reminders, progress, and parent/facilitator features (search children, link child, dashboards, child progress).  
-   I used Prisma to define the schema and seed the database with demo users and lesson content.
+---
 
-2. Frontend 
-   Pages for login, register, dashboards (child / parent / facilitator), lessons list and lesson detail, quiz flow, goals, and progress.  
-   API calls go through a small helper that always sends **credentials** so cookies work.
+## Run it locally
 
-3. Database & seeding:
-   SQLite file (dev.db) is created locally; it is **not** committed to Git. Running the seed script fills lessons, quizzes, and test accounts so the app is easy to demo.
-
-4. Quality of life fixes I cared about:
-   Fixed seed data when it broke, ordered lessons for a clear curriculum, relaxed CORS for local dev (different ports / hosts), and kept the README honest about how to run everything.
-
-
-How to run it (step by step)
-
-You need Node.js 18+ and npm.
+You need **Node.js 18+**, **npm**, and **PostgreSQL** (local install or a free database like [Neon](https://neon.tech)).
 
 ### Backend
 
-bash
+```bash
 cd backend
 npm install
 copy .env.example .env
+```
 
-Edit backend/.env so it includes at least:
+Edit `backend/.env` — set `JWT_SECRET`, and `DATABASE_URL` for your Postgres (local example):
 
-env
+```env
 PORT=4000
 FRONTEND_URL=http://localhost:3000
-JWT_SECRET=change-this-for-anything-serious
-DATABASE_URL="file:./prisma/dev.db"
-
+JWT_SECRET=use-a-long-random-string
+NODE_ENV=development
+DATABASE_URL="postgresql://USER:PASSWORD@localhost:5432/smart_start_kids?sslmode=disable"
+```
 
 Then:
 
-bash
+```bash
 npm run db:generate
-npx prisma db push
+npx prisma migrate deploy
 npm run db:seed
 npm run dev
 ```
 
-Leave this terminal open. Check http://localhost:4000/health** — you should see {"ok":true}.
+Check **http://localhost:4000/health** → `{"ok":true}`.
 
- Frontend (new terminal, from project root)
+### Frontend (new terminal)
 
-bash
+```bash
 cd frontend
 npm install
+```
 
-Create frontend/.env.local:
+Create `frontend/.env.local`:
 
-env
+```env
 NEXT_PUBLIC_API_URL=http://localhost:4000
+```
 
-
-Then:
-
-bash
+```bash
 npm run dev
+```
 
-Open **http://localhost:3000**. Use **localhost** consistently (avoid mixing `127.0.0.1` and `localhost`) so login cookies work reliably.
+Open **http://localhost:3000**. Use **localhost** consistently (not mixed with `127.0.0.1`) for cookies.
 
-### Demo logins (after `db:seed`)
+### Demo accounts (after `db:seed`)
 
-Role :Child,Parent, Facilitator
-Email:emma@example.com,parent@example.com,teacher@example.com
-Password :password123,password123,password123
+| Role | Email | Password |
+|------|--------|----------|
+| Child | `emma@example.com` | `password123` |
+| Parent | `parent@example.com` | `password123` |
+| Facilitator | `teacher@example.com` | `password123` |
 
+You can also **register** a new account.
 
-You can also register a new account and use that instead.
+---
 
-Repository layout
+## Put it on the internet (public URL)
 
-- backend/— API server, Prisma schema and seed, environment example.  
-- frontend/ — Next.js app and UI.  
+You need **two URLs**: one for the **frontend** and one for the **API**.
 
- If something goes wrong
+1. **API + database — [Railway](https://railway.app)**  
+   - New project → **Deploy from GitHub** → pick this repo.  
+   - Add **PostgreSQL**.  
+   - Add a **service** from the same repo, **Root Directory:** `backend`.  
+   - **Variables:** link `DATABASE_URL`, set `JWT_SECRET`, `NODE_ENV=production`, `FRONTEND_URL` = your Vercel URL (after step 2).  
+   - Copy the API **public URL** (e.g. `https://xxxx.up.railway.app`).
 
-- Cannot reach serveron login , Start the backend first (npm run dev in backend).  
-- Empty lessons** ,Run npm run db:seed again in backend.  
-- Prisma errors ,From `backend`: npm run db:generate then npx prisma db push.  
+2. **Frontend — [Vercel](https://vercel.com)**  
+   - Import the repo, **Root Directory:** `frontend`.  
+   - **Environment variable:** `NEXT_PUBLIC_API_URL` = your Railway API URL (no trailing slash).  
+   - Deploy → copy your **site URL** (`https://your-app.vercel.app`). That is the link you share.
 
+3. **CORS** — Set `FRONTEND_URL` on Railway to the exact Vercel URL, redeploy the API if needed.
 
+4. **Seed production (once)** — Railway **Shell** on the backend, or locally with production `DATABASE_URL`:
 
- Deploying (short note)
+```bash
+cd backend
+npx prisma db seed
+```
 
-For a real public deployment you would typically host the frontend (e.g. Vercel) and the API on a platform that runs Node (e.g. Railway, Render) with a production database (often PostgreSQL), set NEXT_PUBLIC_API_URL, `FRONTEND_URL`, JWT_SECRET, and DATABASE_URL on the server, then build and start the backend. Local development uses SQLite as above.
+---
 
+## Repository layout
 
- License
+- `backend/` — API, Prisma schema, migrations, `railway.toml`  
+- `frontend/` — Next.js app, `vercel.json`  
 
-ISC  see backend/package.json and frontend/package.json.
+---
+
+## If something goes wrong
+
+- **Cannot reach server** — Start the backend (`npm run dev` in `backend`).  
+- **Empty lessons** — Run `npm run db:seed` again (local) or seed production once.  
+- **Login works locally but not on Vercel** — Check `FRONTEND_URL` on the API and `NEXT_PUBLIC_API_URL` on Vercel.  
+- **Prisma errors** — `npm run db:generate`, then `npx prisma migrate deploy`.  
+
+---
+
+## License
+
+ISC — see `backend/package.json` and `frontend/package.json`.

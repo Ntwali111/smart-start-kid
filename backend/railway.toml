@@ -1,0 +1,10 @@
+# Railway: set Root Directory to "backend" in the service settings.
+# Add a PostgreSQL plugin and copy DATABASE_URL into Variables (or link the DB).
+
+[build]
+builder = "nixpacks"
+buildCommand = "npm install && npm run build && npx prisma migrate deploy"
+
+[deploy]
+startCommand = "npm start"
+restartPolicyType = "on_failure"
