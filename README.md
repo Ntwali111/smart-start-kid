@@ -1,96 +1,90 @@
 # Smart Start Kids
 
-Financial literacy app for children, with parent and facilitator dashboards. This repo is a personal project (no collaborators).
+This is my exam project: a **web app that teaches children about money** in a simple, friendly way. Learners read short lessons, answer quizzes, and can set savings goals. **Parents** and **facilitators** get their own screens so they can see how a child is doing—not just scores, but progress over time.
 
-## What you need
+I built the full stack myself: a small **REST API** in Node, a **Next.js** website for the UI, and a **database** behind it so users and progress are saved properly.
 
-- [Node.js](https://nodejs.org/) **v18 or newer** (includes `npm`)
-- [Git](https://git-scm.com/) (to clone the repo)
+---
 
-Check versions:
+## What the app does (in plain words)
 
-```bash
-node -v
-npm -v
-```
+| Who | What they can do |
+|-----|-------------------|
+| **Child** | Sign up / log in, follow lessons in order, take quizzes, set savings goals, see their own progress. |
+| **Parent** | Link to a child’s account, search children by email, see dashboards and progress for linked kids. |
+| **Facilitator** | Similar to parents: link children, view class-style lists and individual progress. |
 
-## Run the project locally (follow in order)
+Lessons are ordered so learning feels like a path—for example it starts with *“What is money?”* and continues through saving, needs vs wants, earning, and a simple budget idea. Each lesson can have quiz questions; submitting answers saves a score and marks progress.
 
-### 1. Clone the repository
+---
 
-```bash
-git clone https://github.com/Ntwali111/smart-start-kid.git
-cd smart-start-kid
-```
+## What I used (technologies)
 
-(If your folder name is `smart-start-kids`, use that path in the commands below.)
+- **Frontend:** Next.js, React, TypeScript, Tailwind CSS  
+- **Backend:** Express (Node), TypeScript  
+- **Database:** SQLite locally, with **Prisma** as the ORM (models for users, lessons, quizzes, goals, links between parents and children, etc.)  
+- **Security:** Passwords are hashed; login uses a **JWT** stored in an **httpOnly cookie** so the browser sends it safely with API calls  
 
-### 2. Backend – install dependencies
+The frontend talks to the backend using `NEXT_PUBLIC_API_URL` (for local dev, `http://localhost:4000`). CORS is set so the React app and API can work together when both run on your machine.
+
+---
+
+## What I actually built (project work)
+
+1. **Backend (`backend/`):**  
+   Routes for sign-up, login, logout, “who am I”, lessons (list + detail), quizzes (list + submit), savings goals, reminders, progress, and parent/facilitator features (search children, link child, dashboards, child progress).  
+   I used Prisma to define the schema and seed the database with demo users and lesson content.
+
+2. **Frontend (`frontend/`):**  
+   Pages for login, register, dashboards (child / parent / facilitator), lessons list and lesson detail, quiz flow, goals, and progress.  
+   API calls go through a small helper that always sends **credentials** so cookies work.
+
+3. **Database & seeding:**  
+   SQLite file (`dev.db`) is created locally; it is **not** committed to Git. Running the seed script fills lessons, quizzes, and test accounts so the app is easy to demo.
+
+4. **Quality-of-life fixes I cared about:**  
+   Fixed seed data when it broke, ordered lessons for a clear curriculum, relaxed CORS for local dev (different ports / hosts), and kept the README honest about how to run everything.
+
+---
+
+## How to run it (step by step)
+
+You need **Node.js 18+** and **npm**.
+
+### Backend
 
 ```bash
 cd backend
 npm install
-```
-
-### 3. Backend – environment file
-
-Create `backend/.env` (you can start from the example file):
-
-```bash
 copy .env.example .env
 ```
 
-On Windows PowerShell, if `copy` fails:
-
-```powershell
-Copy-Item .env.example .env
-```
-
-Edit `backend/.env` and set at least:
+Edit `backend/.env` so it includes at least:
 
 ```env
 PORT=4000
 FRONTEND_URL=http://localhost:3000
-JWT_SECRET=change-this-to-a-long-random-string-in-production
+JWT_SECRET=change-this-for-anything-serious
 DATABASE_URL="file:./prisma/dev.db"
 ```
 
-`DATABASE_URL` must stay as SQLite `file:./prisma/dev.db` for the default setup in this repo.
-
-### 4. Backend – database and seed data
-
-Still inside `backend`:
+Then:
 
 ```bash
 npm run db:generate
 npx prisma db push
 npm run db:seed
-```
-
-- `db:generate` creates the Prisma client.  
-- `db push` creates/updates the SQLite database file from `prisma/schema.prisma`.  
-- `db:seed` adds lessons, quizzes, and demo users.
-
-### 5. Start the backend API
-
-```bash
 npm run dev
 ```
 
-Leave this terminal open. You should see something like: `Backend running on http://localhost:4000`.
+Leave this terminal open. Check **http://localhost:4000/health** — you should see `{"ok":true}`.
 
-Test in the browser: [http://localhost:4000/health](http://localhost:4000/health) should return `{"ok":true}`.
-
-### 6. Frontend – install dependencies (new terminal)
-
-Open a **second** terminal, from the repo root:
+### Frontend (new terminal, from project root)
 
 ```bash
 cd frontend
 npm install
 ```
-
-### 7. Frontend – environment file
 
 Create `frontend/.env.local`:
 
@@ -98,56 +92,47 @@ Create `frontend/.env.local`:
 NEXT_PUBLIC_API_URL=http://localhost:4000
 ```
 
-Use the same host you use in the browser (prefer `http://localhost:3000` for the site and `http://localhost:4000` for the API).
-
-### 8. Start the frontend
-
-Still in `frontend`:
+Then:
 
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). You should get the login page.
+Open **http://localhost:3000**. Use **localhost** consistently (avoid mixing `127.0.0.1` and `localhost`) so login cookies work reliably.
 
-### 9. Log in or register
+### Demo logins (after `db:seed`)
 
-**Demo accounts** (after a successful `npm run db:seed` in `backend`):
+| Role | Email | Password |
+|------|--------|----------|
+| Child | `emma@example.com` | `password123` |
+| Parent | `parent@example.com` | `password123` |
+| Facilitator | `teacher@example.com` | `password123` |
 
-| Role          | Email                 | Password     |
-|---------------|-----------------------|-------------|
-| Child         | `emma@example.com`    | `password123` |
-| Parent        | `parent@example.com`  | `password123` |
-| Facilitator   | `teacher@example.com` | `password123` |
-
-Or use **Register** to create a new account; then log in with that email and password.
-
-### 10. Quick checks
-
-- After login, open **Lessons** and open a lesson.  
-- Complete a quiz from the lesson flow.  
-- Child → **Dashboard** / **Progress**; parent/facilitator → their dashboards.
+You can also **register** a new account and use that instead.
 
 ---
 
-## Repo layout
+## Repository layout
 
-- `backend/` – Express API, Prisma, SQLite (`prisma/dev.db` is local only, not committed).  
-- `frontend/` – Next.js app.  
-- `DEPLOYMENT.md` – notes for deploying elsewhere (e.g. hosted Postgres).  
+- **`backend/`** — API server, Prisma schema and seed, environment example.  
+- **`frontend/`** — Next.js app and UI.  
 
-Production deployment usually uses PostgreSQL; this README is for **local development with SQLite**.
+---
 
-## Troubleshooting
+## If something goes wrong
 
-| Problem | What to try |
-|--------|--------------|
-| `Cannot reach the server` on login | Backend not running; run `npm run dev` in `backend`. |
-| Lessons empty or errors | Run `npm run db:seed` again in `backend`. |
-| Port 3000 in use | Next.js will suggest another port (e.g. 3001). If the API is still on 4000, keep `NEXT_PUBLIC_API_URL=http://localhost:4000`. |
-| CORS / cookies odd | Use `http://localhost` for both app and API, not mixed `127.0.0.1` and `localhost`. |
-| Prisma errors | From `backend`: `npm run db:generate` then `npx prisma db push`. |
+- **“Cannot reach server” on login** — Start the backend first (`npm run dev` in `backend`).  
+- **Empty lessons** — Run `npm run db:seed` again in `backend`.  
+- **Prisma errors** — From `backend`: `npm run db:generate` then `npx prisma db push`.  
+
+---
+
+## Deploying (short note)
+
+For a real public deployment you would typically host the frontend (e.g. Vercel) and the API on a platform that runs Node (e.g. Railway, Render) with a **production database** (often PostgreSQL), set `NEXT_PUBLIC_API_URL`, `FRONTEND_URL`, `JWT_SECRET`, and `DATABASE_URL` on the server, then build and start the backend. Local development uses SQLite as above.
+
+---
 
 ## License
 
-ISC (see `backend/package.json` / `frontend/package.json`).
+ISC — see `backend/package.json` and `frontend/package.json`.
