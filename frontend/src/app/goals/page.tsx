@@ -54,33 +54,97 @@ export default function GoalsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
-      <AppNav />
-      <h1 className="mb-6 text-3xl font-bold">Savings Goals</h1>
-      <form onSubmit={createGoal} className="space-y-3 rounded-xl border p-4">
-        <input className="w-full rounded border p-2" placeholder="Goal title" value={title} onChange={(e) => setTitle(e.target.value)} />
-        <input className="w-full rounded border p-2" placeholder="Target amount" value={targetAmount} onChange={(e) => setTargetAmount(e.target.value)} />
-        <button className="rounded bg-blue-600 px-4 py-2 font-semibold text-white">Create Goal</button>
-      </form>
-      {result && <p className="mt-4">{result}</p>}
-      <div className="mt-6 grid gap-3">
-        {goals.map((goal) => {
-          const percentage = goal.targetAmount > 0 ? Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100)) : 0;
-          return (
-            <article key={goal.id} className="rounded-xl border p-4">
-              <h2 className="font-semibold">{goal.title}</h2>
-              <p>Saved: {goal.currentAmount} / {goal.targetAmount}</p>
-              <p>Remaining: {Math.max(0, goal.targetAmount - goal.currentAmount)}</p>
-              <p>Progress: {percentage}%</p>
-              <div className="mt-3 flex gap-2">
-                <input className="w-44 rounded border p-2" placeholder="Add amount" value={addByGoalId[goal.id] ?? ""} onChange={(e) => setAddByGoalId((prev) => ({ ...prev, [goal.id]: e.target.value }))} />
-                <button onClick={() => void addSavings(goal.id)} className="rounded bg-emerald-600 px-3 py-2 text-sm font-semibold text-white">
-                  Add Savings
-                </button>
-              </div>
-            </article>
-          );
-        })}
+    <main className="min-h-screen bg-gradient-to-br from-green-100 via-emerald-100 to-blue-100 px-4 py-8">
+      <div className="mx-auto max-w-3xl">
+        <AppNav />
+        <div className="mb-8 text-center">
+          <h1 className="mb-2 text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-green-600 to-emerald-600">
+            🎯 Savings Goals
+          </h1>
+          <p className="text-lg text-green-700 font-semibold">Create your goals and watch your savings grow! 🌱</p>
+        </div>
+        
+        <div className="mb-8">
+          <form onSubmit={createGoal} className="rounded-2xl bg-gradient-to-br from-blue-400 to-purple-400 p-6 shadow-lg">
+            <h2 className="mb-4 text-2xl font-bold text-white">Create a New Goal ✨</h2>
+            <div className="space-y-4">
+              <input 
+                className="w-full rounded-xl border-2 border-transparent bg-white px-4 py-3 text-lg font-semibold placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all" 
+                placeholder="Goal title (e.g., New Bike 🚲)" 
+                value={title} 
+                onChange={(e) => setTitle(e.target.value)} 
+                required
+              />
+              <input 
+                className="w-full rounded-xl border-2 border-transparent bg-white px-4 py-3 text-lg font-semibold placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-300 transition-all" 
+                placeholder="Target amount (e.g., 500)" 
+                type="number"
+                value={targetAmount} 
+                onChange={(e) => setTargetAmount(e.target.value)}
+                required
+              />
+              <button className="w-full rounded-xl bg-gradient-to-r from-yellow-400 to-orange-400 px-6 py-3 text-lg font-bold text-white hover:shadow-lg transform hover:scale-105 transition-all duration-200 active:scale-95">
+                ✏️ Create Goal
+              </button>
+            </div>
+          </form>
+          {result && <p className="mt-4 rounded-xl bg-white p-3 font-semibold text-center text-green-700 shadow-md">{result}</p>}
+        </div>
+
+        <div>
+          <h2 className="mb-4 text-3xl font-bold text-green-700">Your Goals 💚</h2>
+          <div className="space-y-4">
+            {goals.map((goal) => {
+              const percentage = goal.targetAmount > 0 ? Math.min(100, Math.round((goal.currentAmount / goal.targetAmount) * 100)) : 0;
+              return (
+                <div key={goal.id} className="rounded-2xl bg-gradient-to-br from-white to-green-50 p-6 shadow-md border-2 border-green-200">
+                  <h3 className="mb-2 text-2xl font-bold text-green-700">{goal.title}</h3>
+                  <p className="mb-3 text-lg font-semibold text-gray-700">
+                    💰 ${goal.currentAmount} / ${goal.targetAmount}
+                  </p>
+                  <p className="mb-4 text-sm text-gray-600">
+                    Remaining: <span className="font-bold text-orange-600">${Math.max(0, goal.targetAmount - goal.currentAmount)}</span>
+                  </p>
+                  
+                  <div className="mb-4">
+                    <div className="flex justify-between mb-2">
+                      <p className="font-semibold text-gray-700">Progress</p>
+                      <p className="font-bold text-green-600 text-lg">{percentage}% 📈</p>
+                    </div>
+                    <div className="h-4 rounded-full bg-gray-300 overflow-hidden shadow-sm">
+                      <div 
+                        className="h-full bg-gradient-to-r from-green-400 to-emerald-500 transition-all duration-500" 
+                        style={{ width: `${percentage}%` }}
+                      ></div>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <input 
+                      className="flex-1 rounded-xl border-2 border-emerald-300 bg-white px-4 py-2 text-lg font-semibold text-gray-800 placeholder-gray-500 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-300 transition-all" 
+                      placeholder="Add amount 💵" 
+                      type="number"
+                      value={addByGoalId[goal.id] ?? ""} 
+                      onChange={(e) => setAddByGoalId((prev) => ({ ...prev, [goal.id]: e.target.value }))} 
+                    />
+                    <button 
+                      onClick={() => void addSavings(goal.id)} 
+                      className="rounded-xl bg-gradient-to-r from-emerald-400 to-teal-500 px-6 py-2 text-lg font-bold text-white hover:shadow-lg transform hover:scale-105 transition-all duration-200 active:scale-95"
+                    >
+                      ➕ Add
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          {goals.length === 0 && (
+            <div className="rounded-2xl bg-gradient-to-br from-blue-300 to-purple-300 p-8 text-center shadow-lg">
+              <p className="text-2xl font-bold text-white">🎊 No goals yet!</p>
+              <p className="text-white mt-2">Create your first savings goal above! 🚀</p>
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );

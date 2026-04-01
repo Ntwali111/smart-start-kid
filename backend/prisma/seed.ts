@@ -1,14 +1,17 @@
-import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 import "dotenv/config";
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-  throw new Error("DATABASE_URL is not configured.");
+const prisma = new PrismaClient();
+
+async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 10);
 }
-const prisma = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 
 async function main() {
+  console.log("🌱 Seeding database...");
+
+  // Define lessons with quizzes
   const lessons = [
     {
       title: "What is money?",
@@ -61,6 +64,40 @@ async function main() {
         },
       ],
     },
+    {
+      title: "Earning money",
+      content:
+        "Earning means getting money by doing work, helping with tasks, or running a small project. We can save part of what we earn.",
+      category: "Financial Basics",
+      ageGroup: "8-12",
+      quizzes: [
+        {
+          question: "What does it mean to earn money?",
+          optionA: "To spend all money quickly",
+          optionB: "To get money for work done",
+          optionC: "To hide money forever",
+          optionD: "To borrow from everyone",
+          correctAnswer: "B",
+        },
+      ],
+    },
+    {
+      title: "Planning a simple budget",
+      content:
+        "A budget is a plan for money. It helps us decide how much to spend now, how much to save, and how much to share.",
+      category: "Budgeting",
+      ageGroup: "8-12",
+      quizzes: [
+        {
+          question: "What is a budget?",
+          optionA: "A plan for using money",
+          optionB: "A type of toy",
+          optionC: "Only a bank account",
+          optionD: "A way to avoid saving",
+          correctAnswer: "A",
+        },
+      ],
+    },
   ];
 
   for (const lesson of lessons) {
@@ -97,6 +134,105 @@ async function main() {
       }
     }
   }
+
+  // Create test users for demo
+  console.log("Creating test users...");
+  
+  // Create test child
+  let testChild = await prisma.user.findUnique({
+    where: { email: "emma@example.com" },
+  });
+  
+  if (!testChild) {
+    testChild = await prisma.user.create({
+      data: {
+        fullName: "Emma Johnson",
+        email: "emma@example.com",
+        password: await hashPassword("password123"),
+        role: "child",
+      },
+    });
+    console.log(`✓ Created test child: ${testChild.email}`);
+  }
+
+  // Create test parent
+  let testParent = await prisma.user.findUnique({
+    where: { email: "parent@example.com" },
+  });
+  
+  if (!testParent) {
+    testParent = await prisma.user.create({
+      data: {
+        fullName: "Sarah Johnson",
+        email: "parent@example.com",
+        password: await hashPassword("password123"),
+        role: "parent",
+      },
+    });
+    console.log(`✓ Created test parent: ${testParent.email}`);
+  }
+
+  // Create test facilitator
+  let testFacilitator = await prisma.user.findUnique({
+    where: { email: "teacher@example.com" },
+  });
+  
+  if (!testFacilitator) {
+    testFacilitator = await prisma.user.create({
+      data: {
+        fullName: "Ms. Peterson",
+        email: "teacher@example.com",
+        password: await hashPassword("password123"),
+        role: "facilitator",
+      },
+    });
+    console.log(`✓ Created test facilitator: ${testFacilitator.email}`);
+  }
+
+  // Link child to parent
+  const existingLink = await prisma.parentChildLink.findUnique({
+    where: {
+      parentId_childId: {
+        parentId: testParent.id,
+        childId: testChild.id,
+      },
+    },
+  });
+
+  if (!existingLink) {
+    await prisma.parentChildLink.create({
+      data: {
+        parentId: testParent.id,
+        childId: testChild.id,
+      },
+    });
+    console.log(`✓ Linked child ${testChild.fullName} to parent ${testParent.fullName}`);
+  }
+
+  // Link child to facilitator
+  const facilitatorLink = await prisma.parentChildLink.findUnique({
+    where: {
+      parentId_childId: {
+        parentId: testFacilitator.id,
+        childId: testChild.id,
+      },
+    },
+  });
+
+  if (!facilitatorLink) {
+    await prisma.parentChildLink.create({
+      data: {
+        parentId: testFacilitator.id,
+        childId: testChild.id,
+      },
+    });
+    console.log(`✓ Linked child ${testChild.fullName} to facilitator ${testFacilitator.fullName}`);
+  }
+
+  console.log("\n📝 Test Credentials:");
+  console.log("Child:       emma@example.com / password123");
+  console.log("Parent:      parent@example.com / password123");
+  console.log("Facilitator: teacher@example.com / password123");
 }
 
 main()

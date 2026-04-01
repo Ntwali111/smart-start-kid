@@ -39,29 +39,67 @@ export default function QuizPage({ params }: { params: Promise<{ lessonId: strin
   }
 
   return (
-    <main className="mx-auto max-w-3xl px-4 py-8">
-      <AppNav />
-      <h1 className="mb-4 text-3xl font-bold">Quiz</h1>
-      <div className="space-y-4">
-        {questions.map((q, index) => (
-          <div key={q.id} className="rounded-xl border p-4">
-            <p className="mb-2 font-semibold">{index + 1}. {q.question}</p>
-            {(["A", "B", "C", "D"] as const).map((letter) => (
-              <label key={letter} className="block">
-                <input
-                  type="radio"
-                  name={q.id}
-                  checked={answers[q.id] === letter}
-                  onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: letter }))}
-                />{" "}
-                {q[`option${letter}` as keyof Quiz] as string}
-              </label>
-            ))}
+    <main className="min-h-screen bg-gradient-to-br from-purple-200 via-pink-200 to-blue-200 px-4 py-8">
+      <div className="mx-auto max-w-3xl">
+        <AppNav />
+        <div className="mb-8 text-center">
+          <h1 className="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 mb-2">
+            🧠 Quiz Time!
+          </h1>
+          <p className="text-lg text-purple-700 font-semibold">Show us what you learned! 💪</p>
+        </div>
+        
+        <div className="space-y-6">
+          {questions.map((q, index) => (
+            <div key={q.id} className="rounded-2xl bg-white p-6 shadow-lg border-2 border-purple-300">
+              <p className="mb-4 text-xl font-bold text-purple-700">
+                <span className="rounded-full bg-purple-600 text-white w-8 h-8 inline-flex items-center justify-center mr-3">
+                  {index + 1}
+                </span>
+                {q.question}
+              </p>
+              <div className="space-y-3">
+                {(["A", "B", "C", "D"] as const).map((letter) => (
+                  <label 
+                    key={letter} 
+                    className={`flex items-center p-4 rounded-xl border-3 cursor-pointer transition-all duration-200 transform hover:scale-102 ${
+                      answers[q.id] === letter
+                        ? "bg-gradient-to-r from-yellow-300 to-orange-300 border-orange-500 shadow-lg"
+                        : "bg-gray-50 border-gray-300 hover:border-purple-400 hover:bg-purple-50"
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name={q.id}
+                      checked={answers[q.id] === letter}
+                      onChange={() => setAnswers((prev) => ({ ...prev, [q.id]: letter }))}
+                      className="w-5 h-5 cursor-pointer accent-purple-600"
+                    />
+                    <span className="ml-4 text-lg font-semibold text-gray-800">
+                      {letter}. {q[`option${letter}` as keyof Quiz] as string}
+                    </span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-8 text-center">
+          <button 
+            onClick={submitQuiz} 
+            className="rounded-2xl bg-gradient-to-r from-green-400 to-emerald-500 px-8 py-4 text-2xl font-bold text-white hover:shadow-2xl transform hover:scale-105 transition-all duration-200 active:scale-95 shadow-lg"
+          >
+            ✅ Submit Quiz
+          </button>
+        </div>
+
+        {result && (
+          <div className="mt-8 rounded-2xl bg-gradient-to-r from-yellow-300 to-orange-300 p-6 text-center shadow-lg border-3 border-orange-500">
+            <p className="text-2xl font-bold text-orange-700">🎉 {result}</p>
           </div>
-        ))}
+        )}
       </div>
-      <button onClick={submitQuiz} className="mt-6 rounded bg-blue-600 px-4 py-2 font-semibold text-white">Submit Quiz</button>
-      {result && <p className="mt-3">{result}</p>}
     </main>
   );
 }
