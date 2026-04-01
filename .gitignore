@@ -11,9 +11,7 @@ backend/dist/
 .vscode/
 .idea/
 
-# Local SQLite (use Postgres or run migrate in deploy)
+# edited
 *.db
 *.db-journal
-
-# Accidental test artifacts
 cookies.txt
