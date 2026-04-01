@@ -15,3 +15,7 @@ backend/dist/
 *.db
 *.db-journal
 cookies.txt
+
+# Optional local setup scripts (steps are in README.md)
+setup.ps1
+setup.sh
