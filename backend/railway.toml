@@ -2,10 +2,9 @@
 # Add a PostgreSQL plugin and copy DATABASE_URL into Variables (or link the DB).
 
 [build]
-builder = "nixpacks"
-# Migrations run at start (see deploy.startCommand) so the build does not require DB access.
-buildCommand = "npm install && npm run build"
+builder = "DOCKERFILE"
+dockerfilePath = "Dockerfile"
 
 [deploy]
 startCommand = "npx prisma migrate deploy && npm start"
-restartPolicyType = "on_failure"
+restartPolicyType = "ON_FAILURE"
