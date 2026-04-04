@@ -1,8 +1,8 @@
 # Smart Start Kids
 
-This is my exam project: a **web app that teaches children about money** in a simple, friendly way. Learners read short lessons, answer quizzes, and set savings goals. **Parents** and **facilitators** can sign in and follow how learners are doing.
+This project is a web app that teaches children financial literacy skills and positive saving habits from an early age so these learners(children) read short lessons, answer quizzes, and set savings goals while their Parents and facilitators sign in and follow how learners are doing.
 
-I built the full stack myself: a **REST API** in Node (Express), a **Next.js** frontend, and a **PostgreSQL** database with Prisma.
+I built the full stack : a REST API in Node (Express), a Next.js frontend, and a PostgreSQL database with Prisma.
 
 ---
 
@@ -12,9 +12,9 @@ I built the full stack myself: a **REST API** in Node (Express), a **Next.js** f
 |-----|-------------------|
 | **Child** | Sign up / log in, follow lessons in order, take quizzes, set savings goals, see progress. |
 | **Parent** | Link to a child, search children by email, view dashboards and progress. |
-| **Facilitator** | Link children, view class-style lists and individual progress. |
+| **Facilitator** | Link children, view class style lists and individual progress. |
 
-Lessons start with *“What is money?”* and continue through saving, needs vs wants, earning, and a simple budget idea.
+Lessons start with 'What is money?'and continue through saving, needs vs wants, earning, and a simple budget idea.
 
 ---
 
